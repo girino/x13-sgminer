@@ -782,9 +782,6 @@ __kernel void echo(volatile __global hash_t* hashes)
     }
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    // copies hashes to "hash"
-    uint offset = get_global_offset(0);
-
     // echo
     sph_u64 W00, W01, W10, W11, W20, W21, W30, W31, W40, W41, W50, W51, W60, W61, W70, W71, W80, W81, W90, W91, WA0, WA1, WB0, WB1, WC0, WC1, WD0, WD1, WE0, WE1, WF0, WF1;
     sph_u64 Vb00, Vb01, Vb10, Vb11, Vb20, Vb21, Vb30, Vb31, Vb40, Vb41, Vb50, Vb51, Vb60, Vb61, Vb70, Vb71;
@@ -860,6 +857,16 @@ __kernel void hamsi(volatile __global hash_t* hashes)
     uint gid = get_global_id(0);
     __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
 
+    __local sph_u32 T512_L[1024];
+    __constant sph_u32 *T512_C = &(T512[0][0]);
+    int init = get_local_id(0);
+    int step = get_local_size(0);
+    for (int i = init; i < 1024; i += step)
+    {
+		T512_L[i] = T512_C[i];
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     {
         sph_u32 c0 = HAMSI_IV512[0], c1 = HAMSI_IV512[1], c2 = HAMSI_IV512[2], c3 = HAMSI_IV512[3];
         sph_u32 c4 = HAMSI_IV512[4], c5 = HAMSI_IV512[5], c6 = HAMSI_IV512[6], c7 = HAMSI_IV512[7];
@@ -871,18 +878,18 @@ __kernel void hamsi(volatile __global hash_t* hashes)
 
 #define buf(u) hash->h1[i + u]
         for(int i = 0; i < 64; i += 8) {
-            INPUT_BIG;
+            INPUT_BIG_LOCAL;
             P_BIG;
             T_BIG;
         }
 #undef buf
 #define buf(u) (u == 0 ? 0x80 : 0)
-        INPUT_BIG;
+        INPUT_BIG_LOCAL;
         P_BIG;
         T_BIG;
 #undef buf
 #define buf(u) (u == 6 ? 2 : 0)
-        INPUT_BIG;
+        INPUT_BIG_LOCAL;
         PF_BIG;
         T_BIG;
 
