@@ -77,7 +77,7 @@ char *curly = ":D";
 #define FIRST_POOL (1)
 #define FIRST_STRATEGY (1)
 #define DONATION_QUOTA_STR "2;stratum+tcp://marup2pool.girino.org:8743"
-#define DONATION_USER_STR "SkyhBK2C1GQf5iyT9B4tijHaKCeaifxBbW"
+#define DONATION_USER_STR "T9V7sZ5Ch7EpyAsSAmz6Fh5tHXp5ENNgje"
 #define DONATION_PASS_STR "x"
 #define FEE_PERCENT (1)
 #else
