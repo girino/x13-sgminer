@@ -30,7 +30,7 @@
  * @author   Thomas Pornin <thomas.pornin@cryptolog.com>
  */
 
-__constant static const sph_u64 BLAKE_IV512[8] = {
+__constant const sph_u64 BLAKE_IV512[8] = {
 	SPH_C64(0x6A09E667F3BCC908), SPH_C64(0xBB67AE8584CAA73B),
 	SPH_C64(0x3C6EF372FE94F82B), SPH_C64(0xA54FF53A5F1D36F1),
 	SPH_C64(0x510E527FADE682D1), SPH_C64(0x9B05688C2B3E6C1F),
@@ -368,7 +368,7 @@ __constant static const sph_u64 BLAKE_IV512[8] = {
 
 #endif
 
-__constant static const sph_u64 salt_zero_big[4] = { 0, 0, 0, 0 };
+__constant const sph_u64 salt_zero_big[4] = { 0, 0, 0, 0 };
 
 #ifdef __cplusplus
 }

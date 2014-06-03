@@ -99,7 +99,7 @@
 		x3 ^= x4; \
 	} while (0)
 
-__constant static const sph_u64 C[] = {
+__constant const sph_u64 C[] = {
 	C64e(0x72d5dea2df15f867), C64e(0x7b84150ab7231557),
 	C64e(0x81abd6904d5a87f6), C64e(0x4e9f4fc5c3d12b40),
 	C64e(0xea983ae05c45fa9c), C64e(0x03c5d29966b2999a),
@@ -222,7 +222,7 @@ __constant static const sph_u64 C[] = {
 		x ## l = t; \
 	} while (0)
 
-__constant static const sph_u64 JH_IV512[] = {
+__constant const sph_u64 JH_IV512[] = {
 	C64e(0x6fd14b963e00aa17), C64e(0x636a2e057a15d543),
 	C64e(0x8a225e8d0c97ef0b), C64e(0xe9341259f2b3c361),
 	C64e(0x891da0c1536f801e), C64e(0x2aa9056bea2b6d80),

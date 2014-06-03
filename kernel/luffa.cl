@@ -38,7 +38,7 @@ extern "C"{
 #define SPH_LUFFA_PARALLEL   1
 #endif
 
-__constant static const sph_u32 V_INIT[5][8] = {
+__constant const sph_u32 V_INIT[5][8] = {
 	{
 		SPH_C32(0x6d251e69), SPH_C32(0x44b051e0),
 		SPH_C32(0x4eaa6fb4), SPH_C32(0xdbf78465),
@@ -67,28 +67,28 @@ __constant static const sph_u32 V_INIT[5][8] = {
 	}
 };
 
-__constant static const sph_u32 RC00[8] = {
+__constant const sph_u32 RC00[8] = {
 	SPH_C32(0x303994a6), SPH_C32(0xc0e65299),
 	SPH_C32(0x6cc33a12), SPH_C32(0xdc56983e),
 	SPH_C32(0x1e00108f), SPH_C32(0x7800423d),
 	SPH_C32(0x8f5b7882), SPH_C32(0x96e1db12)
 };
 
-__constant static const sph_u32 RC04[8] = {
+__constant const sph_u32 RC04[8] = {
 	SPH_C32(0xe0337818), SPH_C32(0x441ba90d),
 	SPH_C32(0x7f34d442), SPH_C32(0x9389217f),
 	SPH_C32(0xe5a8bce6), SPH_C32(0x5274baf4),
 	SPH_C32(0x26889ba7), SPH_C32(0x9a226e9d)
 };
 
-__constant static const sph_u32 RC10[8] = {
+__constant const sph_u32 RC10[8] = {
 	SPH_C32(0xb6de10ed), SPH_C32(0x70f47aae),
 	SPH_C32(0x0707a3d4), SPH_C32(0x1c1e8f51),
 	SPH_C32(0x707a3d45), SPH_C32(0xaeb28562),
 	SPH_C32(0xbaca1589), SPH_C32(0x40a46f3e)
 };
 
-__constant static const sph_u32 RC14[8] = {
+__constant const sph_u32 RC14[8] = {
 	SPH_C32(0x01685f3d), SPH_C32(0x05a17cf4),
 	SPH_C32(0xbd09caca), SPH_C32(0xf4272b28),
 	SPH_C32(0x144ae5cc), SPH_C32(0xfaa7ae2b),
@@ -97,14 +97,14 @@ __constant static const sph_u32 RC14[8] = {
 
 #if SPH_LUFFA_PARALLEL
 
-__constant static const sph_u64 RCW010[8] = {
+__constant const sph_u64 RCW010[8] = {
 	SPH_C64(0xb6de10ed303994a6), SPH_C64(0x70f47aaec0e65299),
 	SPH_C64(0x0707a3d46cc33a12), SPH_C64(0x1c1e8f51dc56983e),
 	SPH_C64(0x707a3d451e00108f), SPH_C64(0xaeb285627800423d),
 	SPH_C64(0xbaca15898f5b7882), SPH_C64(0x40a46f3e96e1db12)
 };
 
-__constant static const sph_u64 RCW014[8] = {
+__constant const sph_u64 RCW014[8] = {
 	SPH_C64(0x01685f3de0337818), SPH_C64(0x05a17cf4441ba90d),
 	SPH_C64(0xbd09caca7f34d442), SPH_C64(0xf4272b289389217f),
 	SPH_C64(0x144ae5cce5a8bce6), SPH_C64(0xfaa7ae2b5274baf4),
@@ -113,28 +113,28 @@ __constant static const sph_u64 RCW014[8] = {
 
 #endif
 
-__constant static const sph_u32 RC20[8] = {
+__constant const sph_u32 RC20[8] = {
 	SPH_C32(0xfc20d9d2), SPH_C32(0x34552e25),
 	SPH_C32(0x7ad8818f), SPH_C32(0x8438764a),
 	SPH_C32(0xbb6de032), SPH_C32(0xedb780c8),
 	SPH_C32(0xd9847356), SPH_C32(0xa2c78434)
 };
 
-__constant static const sph_u32 RC24[8] = {
+__constant const sph_u32 RC24[8] = {
 	SPH_C32(0xe25e72c1), SPH_C32(0xe623bb72),
 	SPH_C32(0x5c58a4a4), SPH_C32(0x1e38e2e7),
 	SPH_C32(0x78e38b9d), SPH_C32(0x27586719),
 	SPH_C32(0x36eda57f), SPH_C32(0x703aace7)
 };
 
-__constant static const sph_u32 RC30[8] = {
+__constant const sph_u32 RC30[8] = {
 	SPH_C32(0xb213afa5), SPH_C32(0xc84ebe95),
 	SPH_C32(0x4e608a22), SPH_C32(0x56d858fe),
 	SPH_C32(0x343b138f), SPH_C32(0xd0ec4e3d),
 	SPH_C32(0x2ceb4882), SPH_C32(0xb3ad2208)
 };
 
-__constant static const sph_u32 RC34[8] = {
+__constant const sph_u32 RC34[8] = {
 	SPH_C32(0xe028c9bf), SPH_C32(0x44756f91),
 	SPH_C32(0x7e8fce32), SPH_C32(0x956548be),
 	SPH_C32(0xfe191be2), SPH_C32(0x3cb226e5),
@@ -143,7 +143,7 @@ __constant static const sph_u32 RC34[8] = {
 
 #if SPH_LUFFA_PARALLEL
 
-__constant static const sph_u64 RCW230[8] = {
+__constant const sph_u64 RCW230[8] = {
 	SPH_C64(0xb213afa5fc20d9d2), SPH_C64(0xc84ebe9534552e25),
 	SPH_C64(0x4e608a227ad8818f), SPH_C64(0x56d858fe8438764a),
 	SPH_C64(0x343b138fbb6de032), SPH_C64(0xd0ec4e3dedb780c8),
@@ -151,7 +151,7 @@ __constant static const sph_u64 RCW230[8] = {
 };
 
 
-__constant static const sph_u64 RCW234[8] = {
+__constant const sph_u64 RCW234[8] = {
 	SPH_C64(0xe028c9bfe25e72c1), SPH_C64(0x44756f91e623bb72),
 	SPH_C64(0x7e8fce325c58a4a4), SPH_C64(0x956548be1e38e2e7),
 	SPH_C64(0xfe191be278e38b9d), SPH_C64(0x3cb226e527586719),
@@ -160,14 +160,14 @@ __constant static const sph_u64 RCW234[8] = {
 
 #endif
 
-__constant static const sph_u32 RC40[8] = {
+__constant const sph_u32 RC40[8] = {
 	SPH_C32(0xf0d2e9e3), SPH_C32(0xac11d7fa),
 	SPH_C32(0x1bcb66f2), SPH_C32(0x6f2d9bc9),
 	SPH_C32(0x78602649), SPH_C32(0x8edae952),
 	SPH_C32(0x3b6ba548), SPH_C32(0xedae9520)
 };
 
-__constant static const sph_u32 RC44[8] = {
+__constant const sph_u32 RC44[8] = {
 	SPH_C32(0x5090d577), SPH_C32(0x2d1925ab),
 	SPH_C32(0xb46496ac), SPH_C32(0xd1925ab0),
 	SPH_C32(0x29131ab6), SPH_C32(0x0fc053c3),

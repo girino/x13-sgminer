@@ -30,7 +30,7 @@
  * @author   Thomas Pornin <thomas.pornin@cryptolog.com>
  */
 
-__constant static const sph_u64 BMW_IV512[] = {
+__constant const sph_u64 BMW_IV512[] = {
 	SPH_C64(0x8081828384858687), SPH_C64(0x88898A8B8C8D8E8F),
 	SPH_C64(0x9091929394959697), SPH_C64(0x98999A9B9C9D9E9F),
 	SPH_C64(0xA0A1A2A3A4A5A6A7), SPH_C64(0xA8A9AAABACADAEAF),
@@ -367,7 +367,7 @@ __constant static const sph_u64 BMW_IV512[] = {
 
 #define FOLDb   FOLD(sph_u64, MAKE_Qb, SPH_T64, SPH_ROTL64, M, Qb, dH)
 
-__constant static const sph_u64 final_b[16] = {
+__constant const sph_u64 final_b[16] = {
 	SPH_C64(0xaaaaaaaaaaaaaaa0), SPH_C64(0xaaaaaaaaaaaaaaa1),
 	SPH_C64(0xaaaaaaaaaaaaaaa2), SPH_C64(0xaaaaaaaaaaaaaaa3),
 	SPH_C64(0xaaaaaaaaaaaaaaa4), SPH_C64(0xaaaaaaaaaaaaaaa5),

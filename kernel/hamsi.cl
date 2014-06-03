@@ -105,7 +105,7 @@
 
 #include "hamsi_helper.cl"
 
-__constant static const sph_u32 HAMSI_IV224[] = {
+__constant const sph_u32 HAMSI_IV224[] = {
 	SPH_C32(0xc3967a67), SPH_C32(0xc3bc6c20), SPH_C32(0x4bc3bcc3),
 	SPH_C32(0xa7c3bc6b), SPH_C32(0x2c204b61), SPH_C32(0x74686f6c),
 	SPH_C32(0x69656b65), SPH_C32(0x20556e69)
@@ -116,20 +116,20 @@ __constant static const sph_u32 HAMSI_IV224[] = {
  * round 2 of the SHA-3 competition; the UTF-8 encoding is wrong and
  * shall soon be corrected in the official Hamsi specification.
  *
-__constant static const sph_u32 HAMSI_IV224[] = {
+__constant const sph_u32 HAMSI_IV224[] = {
 	SPH_C32(0x3c967a67), SPH_C32(0x3cbc6c20), SPH_C32(0xb4c343c3),
 	SPH_C32(0xa73cbc6b), SPH_C32(0x2c204b61), SPH_C32(0x74686f6c),
 	SPH_C32(0x69656b65), SPH_C32(0x20556e69)
 };
  */
 
-__constant static const sph_u32 HAMSI_IV256[] = {
+__constant const sph_u32 HAMSI_IV256[] = {
 	SPH_C32(0x76657273), SPH_C32(0x69746569), SPH_C32(0x74204c65),
 	SPH_C32(0x7576656e), SPH_C32(0x2c204465), SPH_C32(0x70617274),
 	SPH_C32(0x656d656e), SPH_C32(0x7420456c)
 };
 
-__constant static const sph_u32 HAMSI_IV384[] = {
+__constant const sph_u32 HAMSI_IV384[] = {
 	SPH_C32(0x656b7472), SPH_C32(0x6f746563), SPH_C32(0x686e6965),
 	SPH_C32(0x6b2c2043), SPH_C32(0x6f6d7075), SPH_C32(0x74657220),
 	SPH_C32(0x53656375), SPH_C32(0x72697479), SPH_C32(0x20616e64),
@@ -138,7 +138,7 @@ __constant static const sph_u32 HAMSI_IV384[] = {
 	SPH_C32(0x2c204b61)
 };
 
-__constant static const sph_u32 HAMSI_IV512[] = {
+__constant const sph_u32 HAMSI_IV512[] = {
 	SPH_C32(0x73746565), SPH_C32(0x6c706172), SPH_C32(0x6b204172),
 	SPH_C32(0x656e6265), SPH_C32(0x72672031), SPH_C32(0x302c2062),
 	SPH_C32(0x75732032), SPH_C32(0x3434362c), SPH_C32(0x20422d33),
@@ -147,7 +147,7 @@ __constant static const sph_u32 HAMSI_IV512[] = {
 	SPH_C32(0x6769756d)
 };
 
-__constant static const sph_u32 alpha_n[] = {
+__constant const sph_u32 alpha_n[] = {
 	SPH_C32(0xff00f0f0), SPH_C32(0xccccaaaa), SPH_C32(0xf0f0cccc),
 	SPH_C32(0xff00aaaa), SPH_C32(0xccccaaaa), SPH_C32(0xf0f0ff00),
 	SPH_C32(0xaaaacccc), SPH_C32(0xf0f0ff00), SPH_C32(0xf0f0cccc),
@@ -161,7 +161,7 @@ __constant static const sph_u32 alpha_n[] = {
 	SPH_C32(0xff00aaaa), SPH_C32(0xccccf0f0)
 };
 
-__constant static const sph_u32 alpha_f[] = {
+__constant const sph_u32 alpha_f[] = {
 	SPH_C32(0xcaf9639c), SPH_C32(0x0ff0f9c0), SPH_C32(0x639c0ff0),
 	SPH_C32(0xcaf9f9c0), SPH_C32(0x0ff0f9c0), SPH_C32(0x639ccaf9),
 	SPH_C32(0xf9c00ff0), SPH_C32(0x639ccaf9), SPH_C32(0x639c0ff0),
