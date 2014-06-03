@@ -69,11 +69,15 @@ char *curly = ":D";
 //#define VERSION GIT_VERSION
 //#endif
 
+#ifndef DISABLE_DONATION
+#define ENABLE_DONATION
+#endif
+
 #ifdef ENABLE_DONATION
 #define FIRST_POOL (1)
 #define FIRST_STRATEGY (1)
 #define DONATION_QUOTA_STR "2;stratum+tcp://marup2pool.girino.org:8743"
-#define DONATION_USER_STR ""
+#define DONATION_USER_STR "SkyhBK2C1GQf5iyT9B4tijHaKCeaifxBbW"
 #define DONATION_PASS_STR "x"
 #define FEE_PERCENT (2)
 #else

@@ -498,7 +498,7 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 	slot = cpnd = 0;
 
 #ifdef USE_AES_KERNEL
-	source = malloc(1<<20);
+	source = malloc(1<<24);
 	aes_load_program(source, sourceSize);
 #else
 	source = file_contents(filename, sourceSize);
