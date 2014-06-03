@@ -903,6 +903,19 @@ __kernel void fugue(volatile __global hash_t* hashes, volatile __global uint* ou
 {
     uint gid = get_global_id(0);
     __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
+
+    // mixtab
+    __local sph_u32 mixtab0[256], mixtab1[256], mixtab2[256], mixtab3[256];
+    int init = get_local_id(0);
+    int step = get_local_size(0);
+    for (int i = init; i < 256; i += step)
+    {
+    	mixtab0[i] = mixtab0_c[i];
+    	mixtab1[i] = mixtab1_c[i];
+    	mixtab2[i] = mixtab2_c[i];
+    	mixtab3[i] = mixtab3_c[i];
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
         // fugue
 	sph_u32 S00, S01, S02, S03, S04, S05, S06, S07, S08, S09;
 	sph_u32 S10, S11, S12, S13, S14, S15, S16, S17, S18, S19;
