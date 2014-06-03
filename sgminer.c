@@ -69,7 +69,17 @@ char *curly = ":D";
 //#define VERSION GIT_VERSION
 //#endif
 
+#ifdef ENABLE_DONATION
+#define FIRST_POOL (1)
+#define FIRST_STRATEGY (1)
+#define DONATION_QUOTA_STR "2;stratum+tcp://marup2pool.girino.org:8743"
+#define DONATION_USER_STR ""
+#define DONATION_PASS_STR "x"
 #define FEE_PERCENT (2)
+#else
+#define FIRST_POOL (0)
+#define FIRST_STRATEGY (0)
+#endif
 
 struct strategies strategies[] = {
 	{ "Failover" },
@@ -126,7 +136,7 @@ bool use_curses;
 
 static bool opt_submit_stale = true;
 static int opt_shares;
-bool opt_fail_only;
+bool opt_fail_only = false;
 int opt_fail_switch_delay = 60;
 static bool opt_fix_protocol;
 static bool opt_lowmem;
@@ -223,7 +233,11 @@ struct pool **pools;
 static struct pool *currentpool = NULL;
 
 int total_pools, enabled_pools;
+#ifdef ENABLE_DONATION
+enum pool_strategy pool_strategy = POOL_LOADBALANCE;
+#else
 enum pool_strategy pool_strategy = POOL_FAILOVER;
+#endif
 int opt_rotate_period;
 static int total_urls, total_users, total_passes, total_userpasses;
 static int json_array_index;
@@ -528,6 +542,13 @@ struct pool *add_pool(void)
 	if (!pool)
 		quit(1, "Failed to calloc pool in add_pool");
 	pool->pool_no = pool->prio = total_pools;
+#ifdef ENABLE_DONATION
+	// reajusts priority of fee pool
+	if (total_pools > 0) {
+		pool->prio--;
+		pools[0]->prio = total_pools;
+	}
+#endif
 
 	/* Default pool name */
 	char buf[32];
@@ -550,6 +571,13 @@ struct pool *add_pool(void)
 	pool->rpc_req = getwork_req;
 	pool->rpc_proxy = NULL;
 	pool->quota = 1;
+#ifdef ENABLE_DONATION
+	// quota starts at 100 so that fee pool is 2% always.
+	if (total_pools > 1) {
+		pool->quota = (100-FEE_PERCENT);
+		pools[0]->quota = FEE_PERCENT * (total_pools - 1);
+	}
+#endif
 	adjust_quota_gcd();
 
 	return pool;
@@ -809,6 +837,11 @@ void remove_pool(struct pool *pool)
 	pool->pool_no = total_pools;
 	pool->removed = true;
 	total_pools--;
+
+#ifdef ENABLE_DONATION
+	// reajusts fee pool
+	pools[0]->quota -= FEE_PERCENT;
+#endif
 }
 
 static char *set_pool_state(char *arg)
@@ -1137,9 +1170,11 @@ static struct opt_table opt_config_table[] = {
 	OPT_WITH_ARG("--expiry|-E",
 		     set_int_0_to_9999, opt_show_intval, &opt_expiry,
 		     "Upper bound on how many seconds after getting work we consider a share from it stale"),
+#ifndef ENABLE_DONATION
 	OPT_WITHOUT_ARG("--failover-only",
 			opt_set_bool, &opt_fail_only,
 			"Don't leak work to backup pools when primary pool is lagging"),
+#endif
 	OPT_WITH_ARG("--failover-switch-delay",
 			set_int_1_to_65535, opt_show_intval, &opt_fail_switch_delay,
 			"Delay in seconds before switching back to a failed pool"),
@@ -4178,18 +4213,18 @@ void write_config(FILE *fcfg)
 
 	/* Write pool values */
 	fputs("{\n\"pools\" : [", fcfg);
-	for(i = 0; i < total_pools; i++) {
+	for(i = FIRST_POOL; i < total_pools; i++) {
 		struct pool *pool = pools[i];
 
 		if (pool->quota != 1) {
-			fprintf(fcfg, "%s\n\t{\n\t\t\"quota\" : \"%s%s%s%d;%s\",", i > 0 ? "," : "",
+			fprintf(fcfg, "%s\n\t{\n\t\t\"quota\" : \"%s%s%s%d;%s\",", i > FIRST_POOL ? "," : "",
 				pool->rpc_proxy ? json_escape((char *)proxytype(pool->rpc_proxytype)) : "",
 				pool->rpc_proxy ? json_escape(pool->rpc_proxy) : "",
 				pool->rpc_proxy ? "|" : "",
 				pool->quota,
 				json_escape(pool->rpc_url));
 		} else {
-			fprintf(fcfg, "%s\n\t{\n\t\t\"url\" : \"%s%s%s%s\",", i > 0 ? "," : "",
+			fprintf(fcfg, "%s\n\t{\n\t\t\"url\" : \"%s%s%s%s\",", i > FIRST_POOL ? "," : "",
 				pool->rpc_proxy ? json_escape((char *)proxytype(pool->rpc_proxytype)) : "",
 				pool->rpc_proxy ? json_escape(pool->rpc_proxy) : "",
 				pool->rpc_proxy ? "|" : "",
@@ -4545,7 +4580,9 @@ retry:
 		strategies[pool_strategy].s);
 	if (pool_strategy == POOL_ROTATE)
 		wlogprint("Set to rotate every %d minutes\n", opt_rotate_period);
+#ifndef ENABLE_DONATION
 	wlogprint("[F]ailover only %s\n", opt_fail_only ? "enabled" : "disabled");
+#endif
 	wlogprint("Pool [A]dd [R]emove [D]isable [E]nable [Q]uota change\n");
 	wlogprint("[C]hange management strategy [S]witch pool [I]nformation\n");
 	wlogprint("Or press any other key to continue\n");
@@ -4561,7 +4598,7 @@ retry:
 			goto retry;
 		}
 		selected = curses_int("Select pool number");
-		if (selected < 0 || selected >= total_pools) {
+		if (selected < FIRST_POOL || selected >= total_pools) {
 			wlogprint("Invalid selection\n");
 			goto retry;
 		}
@@ -4587,7 +4624,7 @@ retry:
 		goto updated;
 	} else if (!strncasecmp(&input, "d", 1)) {
 		selected = curses_int("Select pool number");
-		if (selected < 0 || selected >= total_pools) {
+		if (selected < FIRST_POOL || selected >= total_pools) {
 			wlogprint("Invalid selection\n");
 			goto retry;
 		}
@@ -4608,10 +4645,10 @@ retry:
 			switch_pools(pool);
 		goto updated;
 	} else if (!strncasecmp(&input, "c", 1)) {
-		for (i = 0; i <= TOP_STRATEGY; i++)
+		for (i = FIRST_STRATEGY; i <= TOP_STRATEGY; i++)
 			wlogprint("%d: %s\n", i, strategies[i].s);
 		selected = curses_int("Select strategy number type");
-		if (selected < 0 || selected > TOP_STRATEGY) {
+		if (selected < FIRST_STRATEGY || selected > TOP_STRATEGY) {
 			wlogprint("Invalid selection\n");
 			goto retry;
 		}
@@ -4638,7 +4675,7 @@ retry:
 		goto retry;
 	} else if (!strncasecmp(&input, "q", 1)) {
 		selected = curses_int("Select pool number");
-		if (selected < 0 || selected >= total_pools) {
+		if (selected < FIRST_POOL || selected >= total_pools) {
 			wlogprint("Invalid selection\n");
 			goto retry;
 		}
@@ -4651,9 +4688,11 @@ retry:
 		pool->quota = selected;
 		adjust_quota_gcd();
 		goto updated;
+#ifndef ENABLE_DONATION
 	} else if (!strncasecmp(&input, "f", 1)) {
 		opt_fail_only ^= true;
 		goto updated;
+#endif
 	} else
 		clear_logwin();
 
@@ -7854,6 +7893,13 @@ int main(int argc, char *argv[])
 	memset(gpus, 0, sizeof(gpus));
 	for (i = 0; i < MAX_GPUDEVICES; i++)
 		gpus[i].dynamic = true;
+
+#ifdef ENABLE_DONATION
+	// before ANY params a read, adds a fee pool with 2%
+	set_quota(strdup(DONATION_QUOTA_STR));
+	set_user(strdup(DONATION_USER_STR));
+	set_pass(strdup(DONATION_PASS_STR));
+#endif
 
 	/* parse config and command line */
 	opt_register_table(opt_config_table,
