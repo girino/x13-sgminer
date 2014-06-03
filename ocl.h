@@ -12,9 +12,17 @@
 
 #include "miner.h"
 
+#ifdef USE_CPU_OPENCL
+#define CL_DEVICE_TYPE_ CL_DEVICE_TYPE_ALL
+#else
+#define CL_DEVICE_TYPE_ CL_DEVICE_TYPE_GPU
+#endif
+
 typedef struct {
 	cl_context context;
 	cl_kernel kernel;
+	// for x13 i need a whole bunch of kernels:
+	cl_kernel x11_kernels[13];
 	cl_command_queue commandQueue;
 	cl_program program;
 	cl_mem outputBuffer;
@@ -33,7 +41,7 @@ typedef struct {
 	enum cl_kernels chosen_kernel;
 } _clState;
 
-extern char *file_contents(const char *filename, int *length);
+extern char *file_contents(const char *filename, size_t *length);
 extern int clDevicesNum(void);
 extern _clState *initCl(unsigned int gpu, char *name, size_t nameSize);
 #endif /* __OCL_H__ */

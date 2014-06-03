@@ -1,5 +1,9 @@
 # Release news
 
+## Version 4.2.0g - TBA
+
+* x13 improvements by girino.
+
 ## Version 4.2.0 - TBA
 
 * Forward-port changes from `ckolivas/cgminer` up to 3.12.3.

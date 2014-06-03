@@ -104,7 +104,7 @@
 
 #endif
 
-__constant static const sph_u64 T0[] = {
+__constant static const sph_u64 T0_C[] = {
 	C64e(0xc632f4a5f497a5c6), C64e(0xf86f978497eb84f8),
 	C64e(0xee5eb099b0c799ee), C64e(0xf67a8c8d8cf78df6),
 	C64e(0xffe8170d17e50dff), C64e(0xd60adcbddcb7bdd6),
@@ -237,7 +237,7 @@ __constant static const sph_u64 T0[] = {
 
 #if !SPH_SMALL_FOOTPRINT_GROESTL
 
-__constant static const sph_u64 T1[] = {
+__constant static const sph_u64 T1_C[] = {
 	C64e(0xc6c632f4a5f497a5), C64e(0xf8f86f978497eb84),
 	C64e(0xeeee5eb099b0c799), C64e(0xf6f67a8c8d8cf78d),
 	C64e(0xffffe8170d17e50d), C64e(0xd6d60adcbddcb7bd),
@@ -368,7 +368,7 @@ __constant static const sph_u64 T1[] = {
 	C64e(0x6d6d0c61d661dad6), C64e(0x2c2c624e3a4e583a)
 };
 
-__constant static const sph_u64 T2[] = {
+__constant static const sph_u64 T2_C[] = {
 	C64e(0xa5c6c632f4a5f497), C64e(0x84f8f86f978497eb),
 	C64e(0x99eeee5eb099b0c7), C64e(0x8df6f67a8c8d8cf7),
 	C64e(0x0dffffe8170d17e5), C64e(0xbdd6d60adcbddcb7),
@@ -499,7 +499,7 @@ __constant static const sph_u64 T2[] = {
 	C64e(0xd66d6d0c61d661da), C64e(0x3a2c2c624e3a4e58)
 };
 
-__constant static const sph_u64 T3[] = {
+__constant static const sph_u64 T3_C[] = {
 	C64e(0x97a5c6c632f4a5f4), C64e(0xeb84f8f86f978497),
 	C64e(0xc799eeee5eb099b0), C64e(0xf78df6f67a8c8d8c),
 	C64e(0xe50dffffe8170d17), C64e(0xb7bdd6d60adcbddc),
@@ -632,7 +632,7 @@ __constant static const sph_u64 T3[] = {
 
 #endif
 
-__constant static const sph_u64 T4[] = {
+__constant static const sph_u64 T4_C[] = {
 	C64e(0xf497a5c6c632f4a5), C64e(0x97eb84f8f86f9784),
 	C64e(0xb0c799eeee5eb099), C64e(0x8cf78df6f67a8c8d),
 	C64e(0x17e50dffffe8170d), C64e(0xdcb7bdd6d60adcbd),
@@ -765,7 +765,7 @@ __constant static const sph_u64 T4[] = {
 
 #if !SPH_SMALL_FOOTPRINT_GROESTL
 
-__constant static const sph_u64 T5[] = {
+__constant static const sph_u64 T5_C[] = {
 	C64e(0xa5f497a5c6c632f4), C64e(0x8497eb84f8f86f97),
 	C64e(0x99b0c799eeee5eb0), C64e(0x8d8cf78df6f67a8c),
 	C64e(0x0d17e50dffffe817), C64e(0xbddcb7bdd6d60adc),
@@ -896,7 +896,7 @@ __constant static const sph_u64 T5[] = {
 	C64e(0xd661dad66d6d0c61), C64e(0x3a4e583a2c2c624e)
 };
 
-__constant static const sph_u64 T6[] = {
+__constant static const sph_u64 T6_C[] = {
 	C64e(0xf4a5f497a5c6c632), C64e(0x978497eb84f8f86f),
 	C64e(0xb099b0c799eeee5e), C64e(0x8c8d8cf78df6f67a),
 	C64e(0x170d17e50dffffe8), C64e(0xdcbddcb7bdd6d60a),
@@ -1027,7 +1027,7 @@ __constant static const sph_u64 T6[] = {
 	C64e(0x61d661dad66d6d0c), C64e(0x4e3a4e583a2c2c62)
 };
 
-__constant static const sph_u64 T7[] = {
+__constant static const sph_u64 T7_C[] = {
 	C64e(0x32f4a5f497a5c6c6), C64e(0x6f978497eb84f8f8),
 	C64e(0x5eb099b0c799eeee), C64e(0x7a8c8d8cf78df6f6),
 	C64e(0xe8170d17e50dffff), C64e(0x0adcbddcb7bdd6d6),

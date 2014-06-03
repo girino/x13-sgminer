@@ -11,7 +11,7 @@ m4_define([lt_age], v_min)
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 ##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##--##
 
-AC_INIT([sgminer], [v_ver], [veox@wemakethings.net], [sgminer], [https://github.com/veox/sgminer])
+AC_INIT([x13-sgminer], [4.1.0g], [sgminer@girino.org], [x13-sgminer], [https://github.com/girino/x13-sgminer])
 
 AC_PREREQ(2.59)
 AC_CANONICAL_SYSTEM
@@ -340,21 +340,6 @@ fi
 
 AC_DEFINE_UNQUOTED([SGMINER_PREFIX], ["$prefix/bin"], [Path to sgminer install])
 
-AC_DEFINE_UNQUOTED([ALEXKARNEW_KERNNAME], ["alexkarnew"], [Filename for Alexey Karimov's optimised kernel for Catalyst >=13.4])
-AC_DEFINE_UNQUOTED([ALEXKAROLD_KERNNAME], ["alexkarold"], [Filename for Alexey Karimov's optimised kernel for Catalyst <13.4])
-AC_DEFINE_UNQUOTED([CKOLIVAS_KERNNAME], ["ckolivas"], [Filename for original scrypt kernel])
-AC_DEFINE_UNQUOTED([ZUIKKIS_KERNNAME], ["zuikkis"], [Filename for Zuikkis' optimised kernel])
-AC_DEFINE_UNQUOTED([PSW_KERNNAME], ["psw"], [Filename for psw's experimental kernel])
-AC_DEFINE_UNQUOTED([DARKCOIN_KERNNAME], ["darkcoin"], [Filename for DarkCoin optimised kernel])
-AC_DEFINE_UNQUOTED([QUBITCOIN_KERNNAME], ["qubitcoin"], [Filename for QubitCoin optimised kernel])
-AC_DEFINE_UNQUOTED([QUARKCOIN_KERNNAME], ["quarkcoin"], [Filename for QuarkCoin optimised kernel])
-AC_DEFINE_UNQUOTED([MYRIADCOIN_GROESTL_KERNNAME], ["myriadcoin-groestl"], [Filename for MyriadCoin-Groestl optimised kernel])
-AC_DEFINE_UNQUOTED([FUGUECOIN_KERNNAME], ["fuguecoin"], [Filename for FugueCoin optimised kernel])
-AC_DEFINE_UNQUOTED([INKCOIN_KERNNAME], ["inkcoin"], [Filename for InkCoin optimised kernel])
-AC_DEFINE_UNQUOTED([ANIMECOIN_KERNNAME], ["animecoin"], [Filename for AnimeCoin optimised kernel])
-AC_DEFINE_UNQUOTED([GROESTLCOIN_KERNNAME], ["groestlcoin"], [Filename for GroestlCoin optimised kernel])
-AC_DEFINE_UNQUOTED([SIFCOIN_KERNNAME], ["sifcoin"], [Filename for Sifcoin optimised kernel])
-AC_DEFINE_UNQUOTED([TWECOIN_KERNNAME], ["twecoin"], [Filename for Twecoin optimised kernel])
 AC_DEFINE_UNQUOTED([MARUCOIN_KERNNAME], ["marucoin"], [Filename for MaruCoin optimised kernel])
 
 AC_SUBST(OPENCL_LIBS)

@@ -1,4 +1,5 @@
 /*
+ * Copyright 2014 Girino Vey!
  * Copyright 2011-2013 Con Kolivas
  * Copyright 2011-2012 Luke Dashjr
  * Copyright 2010 Jeff Garzik
@@ -54,7 +55,6 @@ char *curly = ":D";
 #include "adl.h"
 #include "driver-opencl.h"
 #include "bench_block.h"
-#include "scrypt.h"
 #include "darkcoin.h"
 
 #if defined(unix) || defined(__APPLE__)
@@ -63,10 +63,13 @@ char *curly = ":D";
 	#include <sys/wait.h>
 #endif
 
-#ifdef GIT_VERSION
-#undef VERSION
-#define VERSION GIT_VERSION
-#endif
+// no use for git version for the moment
+//#ifdef GIT_VERSION
+//#undef VERSION
+//#define VERSION GIT_VERSION
+//#endif
+
+#define FEE_PERCENT (2)
 
 struct strategies strategies[] = {
 	{ "Failover" },
@@ -303,7 +306,7 @@ bool sched_paused;
 
 #define DM_SELECT(x, y, z) (dm_mode == DM_BITCOIN ? x : (dm_mode == DM_QUARKCOIN ? y : z))
 
-enum diff_calc_mode dm_mode = DM_LITECOIN;
+enum diff_calc_mode dm_mode = DM_BITCOIN;
 
 static bool time_before(struct tm *tm1, struct tm *tm2)
 {
@@ -509,7 +512,7 @@ void adjust_quota_gcd(void)
 		pool = pools[i];
 		pool->quota_used *= global_quota_gcd;
 		pool->quota_used /= gcd;
-		pool->quota_gcd = pool->quota / gcd;
+		pool->quota_gcd = 10 * pool->quota / gcd; // give time for the 2% to be effective
 	}
 
 	global_quota_gcd = gcd;
@@ -4228,51 +4231,6 @@ void write_config(FILE *fcfg)
 			switch (gpus[i].kernel) {
 				case KL_NONE: // Shouldn't happen
 					break;
-				case KL_ALEXKARNEW:
-					fprintf(fcfg, ALEXKARNEW_KERNNAME);
-					break;
-				case KL_ALEXKAROLD:
-					fprintf(fcfg, ALEXKAROLD_KERNNAME);
-					break;
-				case KL_CKOLIVAS:
-					fprintf(fcfg, CKOLIVAS_KERNNAME);
-					break;
-				case KL_PSW:
-					fprintf(fcfg, PSW_KERNNAME);
-					break;
-				case KL_ZUIKKIS:
-					fprintf(fcfg, ZUIKKIS_KERNNAME);
-					break;
-				case KL_DARKCOIN:
-					fprintf(fcfg, DARKCOIN_KERNNAME);
-					break;
-				case KL_QUBITCOIN:
-					fprintf(fcfg, QUBITCOIN_KERNNAME);
-					break;
-				case KL_QUARKCOIN:
-					fprintf(fcfg, QUARKCOIN_KERNNAME);
-					break;
-				case KL_MYRIADCOIN_GROESTL:
-					fprintf(fcfg, MYRIADCOIN_GROESTL_KERNNAME);
-					break;
-				case KL_FUGUECOIN:
-					fprintf(fcfg, FUGUECOIN_KERNNAME);
-					break;
-				case KL_INKCOIN:
-					fprintf(fcfg, INKCOIN_KERNNAME);
-					break;
-				case KL_ANIMECOIN:
-					fprintf(fcfg, ANIMECOIN_KERNNAME);
-					break;
-				case KL_GROESTLCOIN:
-					fprintf(fcfg, GROESTLCOIN_KERNNAME);
-					break;
-				case KL_SIFCOIN:
-					fprintf(fcfg, SIFCOIN_KERNNAME);
-					break;
-				case KL_TWECOIN:
-					fprintf(fcfg, TWECOIN_KERNNAME);
-					break;
 				case KL_MARUCOIN:
 					fprintf(fcfg, MARUCOIN_KERNNAME);
 					break;
@@ -5927,10 +5885,10 @@ static void gen_stratum_work(struct pool *pool, struct work *work)
 	cg_dwlock(&pool->data_lock);
 
 	/* Generate merkle root */
-	if (gpus[0].kernel == KL_FUGUECOIN || gpus[0].kernel == KL_GROESTLCOIN || gpus[0].kernel == KL_TWECOIN)
-		sha256(pool->coinbase, pool->swork.cb_len, merkle_root);
-	else
-		gen_hash(pool->coinbase, merkle_root, pool->swork.cb_len);
+//	if (gpus[0].kernel == KL_FUGUECOIN || gpus[0].kernel == KL_GROESTLCOIN || gpus[0].kernel == KL_TWECOIN)
+//		sha256(pool->coinbase, pool->swork.cb_len, merkle_root);
+//	else
+	gen_hash(pool->coinbase, merkle_root, pool->swork.cb_len);
 	memcpy(merkle_sha, merkle_root, 32);
 	for (i = 0; i < pool->swork.merkles; i++) {
 		memcpy(merkle_sha + 32, pool->swork.merkle_bin[i], 32);
@@ -6083,41 +6041,11 @@ static void rebuild_nonce(struct work *work, uint32_t nonce)
 	*work_nonce = htole32(nonce);
 
 	switch (gpus[0].kernel) {
-		case KL_DARKCOIN:
-			darkcoin_regenhash(work);
-			break;
-		case KL_QUBITCOIN:
-			qubitcoin_regenhash(work);
-			break;
-		case KL_QUARKCOIN:
-			quarkcoin_regenhash(work);
-			break;
-		case KL_MYRIADCOIN_GROESTL:
-			myriadcoin_groestl_regenhash(work);
-			break;
-		case KL_FUGUECOIN:
-			fuguecoin_regenhash(work);
-			break;
-		case KL_INKCOIN:
-			inkcoin_regenhash(work);
-			break;
-		case KL_ANIMECOIN:
-			animecoin_regenhash(work);
-			break;
-		case KL_GROESTLCOIN:
-			groestlcoin_regenhash(work);
-			break;
-		case KL_SIFCOIN:
-			sifcoin_regenhash(work);
-			break;
-		case KL_TWECOIN:
-			twecoin_regenhash(work);
-			break;
 		case KL_MARUCOIN:
 			marucoin_regenhash(work);
 			break;
 		default:
-			scrypt_regenhash(work);
+			marucoin_regenhash(work);
 			break;
 	}
 }

@@ -32,10 +32,11 @@
 
 #include "findnonce.h"
 #include "ocl.h"
+#include "aes_decode.h"
 
 int opt_platform_id = -1;
 
-char *file_contents(const char *filename, int *length)
+char *file_contents(const char *filename, size_t *length)
 {
 	char *fullpath = alloca(PATH_MAX);
 	void *buffer;
@@ -126,7 +127,7 @@ int clDevicesNum(void) {
 		status = clGetPlatformInfo(platform, CL_PLATFORM_VERSION, sizeof(pbuff), pbuff, NULL);
 		if (status == CL_SUCCESS)
 			applog(LOG_INFO, "CL Platform %d version: %s", i, pbuff);
-		status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numDevices);
+		status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_, 0, NULL, &numDevices);
 		if (status != CL_SUCCESS) {
 			applog(LOG_INFO, "Error %d: Getting Device IDs (num)", status);
 			continue;
@@ -140,7 +141,7 @@ int clDevicesNum(void) {
 			unsigned int j;
 			cl_device_id *devices = (cl_device_id *)malloc(numDevices*sizeof(cl_device_id));
 
-			clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, NULL);
+			clGetDeviceIDs(platform, CL_DEVICE_TYPE_, numDevices, devices, NULL);
 			for (j = 0; j < numDevices; j++) {
 				clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(pbuff), pbuff, NULL);
 				applog(LOG_INFO, "\t%i\t%s", j, pbuff);
@@ -212,6 +213,22 @@ void patch_opcodes(char *w, unsigned remaining)
 	applog(LOG_DEBUG, "Patched a total of %i BFI_INT instructions", patched);
 }
 
+const char* x11_kernel_names[] = {
+		"blake",
+		"bmw",
+		"groestl",
+		"skein",
+		"jh",
+		"keccak",
+		"luffa",
+		"cubehash",
+		"shavite",
+		"simd",
+		"echo",
+		"hamsi",
+		"fugue",
+};
+
 _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 {
 	_clState *clState = calloc(1, sizeof(_clState));
@@ -264,7 +281,7 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 	if (status == CL_SUCCESS)
 		applog(LOG_INFO, "CL Platform version: %s", vbuff);
 
-	status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, 0, NULL, &numDevices);
+	status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_, 0, NULL, &numDevices);
 	if (status != CL_SUCCESS) {
 		applog(LOG_ERR, "Error %d: Getting Device IDs (num)", status);
 		return NULL;
@@ -275,7 +292,7 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 
 		/* Now, get the device list data */
 
-		status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_GPU, numDevices, devices, NULL);
+		status = clGetDeviceIDs(platform, CL_DEVICE_TYPE_, numDevices, devices, NULL);
 		if (status != CL_SUCCESS) {
 			applog(LOG_ERR, "Error %d: Getting Device IDs (list)", status);
 			return NULL;
@@ -312,7 +329,7 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 
 	cl_context_properties cps[3] = { CL_CONTEXT_PLATFORM, (cl_context_properties)platform, 0 };
 
-	clState->context = clCreateContextFromType(cps, CL_DEVICE_TYPE_GPU, NULL, NULL, &status);
+	clState->context = clCreateContextFromType(cps, CL_DEVICE_TYPE_, NULL, NULL, &status);
 	if (status != CL_SUCCESS) {
 		applog(LOG_ERR, "Error %d: Creating Context. (clCreateContextFromType)", status);
 		return NULL;
@@ -407,8 +424,8 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 	char numbuf[16];
 
 	if (cgpu->kernel == KL_NONE) {
-		applog(LOG_INFO, "Selecting kernel ckolivas");
-		clState->chosen_kernel = KL_CKOLIVAS;
+		applog(LOG_INFO, "Selecting kernel X13");
+		clState->chosen_kernel = KL_MARUCOIN;
 		cgpu->kernel = clState->chosen_kernel;
 	} else {
 		clState->chosen_kernel = cgpu->kernel;
@@ -426,86 +443,8 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 	cgpu->vwidth = 1;
 
 	switch (clState->chosen_kernel) {
-		case KL_ALEXKARNEW:
-			applog(LOG_WARNING, "Kernel alexkarnew is experimental.");
-			strcpy(filename, ALEXKARNEW_KERNNAME".cl");
-			strcpy(binaryfilename, ALEXKARNEW_KERNNAME);
-			break;
-		case KL_ALEXKAROLD:
-			applog(LOG_WARNING, "Kernel alexkarold is experimental.");
-			strcpy(filename, ALEXKAROLD_KERNNAME".cl");
-			strcpy(binaryfilename, ALEXKAROLD_KERNNAME);
-			break;
-		case KL_CKOLIVAS:
-			strcpy(filename, CKOLIVAS_KERNNAME".cl");
-			strcpy(binaryfilename, CKOLIVAS_KERNNAME);
-			break;
-		case KL_PSW:
-			applog(LOG_WARNING, "Kernel psw is experimental.");
-			strcpy(filename, PSW_KERNNAME".cl");
-			strcpy(binaryfilename, PSW_KERNNAME);
-			break;
-		case KL_ZUIKKIS:
-			applog(LOG_WARNING, "Kernel zuikkis is experimental.");
-			strcpy(filename, ZUIKKIS_KERNNAME".cl");
-			strcpy(binaryfilename, ZUIKKIS_KERNNAME);
-			/* Kernel only supports lookup-gap 2 */
-			cgpu->lookup_gap = 2;
-			/* Kernel only supports worksize 256 */
-			cgpu->work_size = 256;
-			break;
-		case KL_DARKCOIN:
-			applog(LOG_WARNING, "Kernel darkcoin is experimental.");
-			strcpy(filename, DARKCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, DARKCOIN_KERNNAME);
-			break;
-		case KL_QUBITCOIN:
-			applog(LOG_WARNING, "Kernel qubitcoin is experimental.");
-			strcpy(filename, QUBITCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, QUBITCOIN_KERNNAME);
-			break;
-		case KL_QUARKCOIN:
-			applog(LOG_WARNING, "Kernel quarkcoin is experimental.");
-			strcpy(filename, QUARKCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, QUARKCOIN_KERNNAME);
-			break;
-		case KL_MYRIADCOIN_GROESTL:
-			applog(LOG_WARNING, "Kernel myriadcoin-groestl is experimental.");
-			strcpy(filename, MYRIADCOIN_GROESTL_KERNNAME".cl");
-			strcpy(binaryfilename, MYRIADCOIN_GROESTL_KERNNAME);
-			break;
-		case KL_FUGUECOIN:
-			applog(LOG_WARNING, "Kernel fuguecoin is experimental.");
-			strcpy(filename, FUGUECOIN_KERNNAME".cl");
-			strcpy(binaryfilename, FUGUECOIN_KERNNAME);
-			break;
-		case KL_INKCOIN:
-			applog(LOG_WARNING, "Kernel inkcoin is experimental.");
-			strcpy(filename, INKCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, INKCOIN_KERNNAME);
-			break;
-		case KL_ANIMECOIN:
-			applog(LOG_WARNING, "Kernel animecoin is experimental.");
-			strcpy(filename, ANIMECOIN_KERNNAME".cl");
-			strcpy(binaryfilename, ANIMECOIN_KERNNAME);
-			break;
-		case KL_GROESTLCOIN:
-			applog(LOG_WARNING, "Kernel groestlcoin is experimental.");
-			strcpy(filename, GROESTLCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, GROESTLCOIN_KERNNAME);
-			break;
-		case KL_SIFCOIN:
-			applog(LOG_WARNING, "Kernel sifcoin is experimental.");
-			strcpy(filename, SIFCOIN_KERNNAME".cl");
-			strcpy(binaryfilename, SIFCOIN_KERNNAME);
-			break;
-		case KL_TWECOIN:
-			applog(LOG_WARNING, "Kernel twecoin is experimental.");
-			strcpy(filename, TWECOIN_KERNNAME".cl");
-			strcpy(binaryfilename, TWECOIN_KERNNAME);
-			break;
 		case KL_MARUCOIN:
-			applog(LOG_WARNING, "Kernel marucoin is experimental.");
+			applog(LOG_WARNING, "Kernel X13 is experimental.");
 			strcpy(filename, MARUCOIN_KERNNAME".cl");
 			strcpy(binaryfilename, MARUCOIN_KERNNAME);
 			break;
@@ -552,11 +491,18 @@ _clState *initCl(unsigned int gpu, char *name, size_t nameSize)
 	size_t *binary_sizes;
 	char **binaries;
 	int pl;
-	char *source = file_contents(filename, &pl);
-	size_t sourceSize[] = {(size_t)pl};
+	char *source;
+	size_t sourceSize[1];
 	cl_uint slot, cpnd;
 
 	slot = cpnd = 0;
+
+#ifdef USE_AES_KERNEL
+	source = malloc(1<<20);
+	aes_load_program(source, sourceSize);
+#else
+	source = file_contents(filename, sourceSize);
+#endif
 
 	if (!source)
 		return NULL;
@@ -645,6 +591,9 @@ build:
 	sprintf(CompilerOptions, "-I \"%s\" -I \"%s\" -I \"%skernel\" -I \".\" -D LOOKUP_GAP=%d -D CONCURRENT_THREADS=%d -D WORKSIZE=%d",
 			opt_kernel_path, sgminer_path, sgminer_path,
 			cgpu->lookup_gap, (unsigned int)cgpu->thread_concurrency, (int)clState->wsize);
+	#ifdef SMALL_FOOTPRINT
+	strcat(CompilerOptions, " -D SPH_SMALL_FOOTPRINT_GROESTL=1");
+	#endif
 
 	applog(LOG_DEBUG, "Setting worksize to %d", (int)(clState->wsize));
 	if (clState->vwidth > 1)
@@ -827,7 +776,11 @@ built:
 	}
 
 	/* get a kernel object handle for a kernel with the given name */
-	clState->kernel = clCreateKernel(clState->program, "search", &status);
+	int ij;
+	status = CL_SUCCESS;
+	for (ij = 0; ij < 13 && status == CL_SUCCESS; ij++) {
+		clState->x11_kernels[ij] = clCreateKernel(clState->program, x11_kernel_names[ij], &status);
+	}
 	if (status != CL_SUCCESS) {
 		applog(LOG_ERR, "Error %d: Creating Kernel from program. (clCreateKernel)", status);
 		return NULL;
@@ -835,6 +788,11 @@ built:
 
 	size_t ipt = (1024 / cgpu->lookup_gap + (1024 % cgpu->lookup_gap > 0));
 	size_t bufsize = 128 * ipt * cgpu->thread_concurrency;
+	// adjusts for higher intensities
+	if (bufsize < (64UL*(1UL<<cgpu->intensity))) {
+		applog(LOG_WARNING, "Buffer might be too small, adjusting fomr %zu to %lu", bufsize, (64UL*(1UL<<cgpu->intensity)));
+		bufsize = (64UL*(1UL<<cgpu->intensity));
+	}
 
 	/* Use the max alloc value which has been rounded to a power of
 	 * 2 greater >= required amount earlier */

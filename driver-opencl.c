@@ -1,4 +1,5 @@
 /*
+ * Copyright 2014 Girino Vey!
  * Copyright 2011-2012 Con Kolivas
  * Copyright 2011-2012 Luke Dashjr
  * Copyright 2010 Jeff Garzik
@@ -197,36 +198,6 @@ char *set_thread_concurrency(char *arg)
 
 static enum cl_kernels select_kernel(char *arg)
 {
-	if (!strcmp(arg, ALEXKARNEW_KERNNAME))
-		return KL_ALEXKARNEW;
-	if (!strcmp(arg, ALEXKAROLD_KERNNAME))
-		return KL_ALEXKAROLD;
-	if (!strcmp(arg, CKOLIVAS_KERNNAME))
-		return KL_CKOLIVAS;
-	if (!strcmp(arg, ZUIKKIS_KERNNAME))
-		return KL_ZUIKKIS;
-	if (!strcmp(arg, PSW_KERNNAME))
-		return KL_PSW;
-	if (!strcmp(arg, DARKCOIN_KERNNAME))
-		return KL_DARKCOIN;
-	if (!strcmp(arg, QUBITCOIN_KERNNAME))
-		return KL_QUBITCOIN;
-	if (!strcmp(arg, QUARKCOIN_KERNNAME))
-		return KL_QUARKCOIN;
-	if (!strcmp(arg, MYRIADCOIN_GROESTL_KERNNAME))
-		return KL_MYRIADCOIN_GROESTL;
-	if (!strcmp(arg, FUGUECOIN_KERNNAME))
-		return KL_FUGUECOIN;
-	if (!strcmp(arg, INKCOIN_KERNNAME))
-		return KL_INKCOIN;
-	if (!strcmp(arg, ANIMECOIN_KERNNAME))
-		return KL_ANIMECOIN;
-	if (!strcmp(arg, GROESTLCOIN_KERNNAME))
-		return KL_GROESTLCOIN;
-	if (!strcmp(arg, SIFCOIN_KERNNAME))
-		return KL_SIFCOIN;
-	if (!strcmp(arg, TWECOIN_KERNNAME))
-		return KL_TWECOIN;
 	if (!strcmp(arg, MARUCOIN_KERNNAME))
 		return KL_MARUCOIN;
 
@@ -246,12 +217,8 @@ char *set_kernel(char *arg)
 	if (kern == KL_NONE)
 		return "Invalid parameter to set_kernel";
 	gpus[device++].kernel = kern;
-	if (kern >= KL_DARKCOIN)
-		dm_mode = DM_BITCOIN;
-	else if(kern >= KL_QUARKCOIN)
-		dm_mode = DM_QUARKCOIN;
-	else
-		dm_mode = DM_LITECOIN;
+//	if (kern >= KL_DARKCOIN)
+	dm_mode = DM_BITCOIN;
 
 	while ((nextptr = strtok(NULL, ",")) != NULL) {
 		kern = select_kernel(nextptr);
@@ -1041,46 +1008,52 @@ static _clState *clStates[MAX_GPUDEVICES];
 #define CL_SET_ARG(var) status |= clSetKernelArg(*kernel, num++, sizeof(var), (void *)&var)
 #define CL_SET_VARG(args, var) status |= clSetKernelArg(*kernel, num++, args * sizeof(uint), (void *)var)
 
-static cl_int queue_scrypt_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
+static cl_int queue_x13_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
 {
 	unsigned char *midstate = blk->work->midstate;
-	cl_kernel *kernel = &clState->kernel;
-	unsigned int num = 0;
-	cl_uint le_target;
-	cl_int status = 0;
-
-	le_target = *(cl_uint *)(blk->work->device_target + 28);
-	memcpy(clState->cldata, blk->work->data, 80);
-	status = clEnqueueWriteBuffer(clState->commandQueue, clState->CLbuffer0, true, 0, 80, clState->cldata, 0, NULL,NULL);
-
-	CL_SET_ARG(clState->CLbuffer0);
-	CL_SET_ARG(clState->outputBuffer);
-	CL_SET_ARG(clState->padbuffer8);
-	CL_SET_VARG(4, &midstate[0]);
-	CL_SET_VARG(4, &midstate[16]);
-	CL_SET_ARG(le_target);
-
-	return status;
-}
-
-static cl_int queue_sph_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
-{
-	unsigned char *midstate = blk->work->midstate;
-	cl_kernel *kernel = &clState->kernel;
-	unsigned int num = 0;
 	cl_ulong le_target;
 	cl_int status = 0;
+	int i;
 
 	le_target = *(cl_ulong *)(blk->work->device_target + 24);
 	flip80(clState->cldata, blk->work->data);
 	status = clEnqueueWriteBuffer(clState->commandQueue, clState->CLbuffer0, true, 0, 80, clState->cldata, 0, NULL,NULL);
 
-	CL_SET_ARG(clState->CLbuffer0);
-	CL_SET_ARG(clState->outputBuffer);
-	CL_SET_ARG(le_target);
+	for (i = 0; i < 13; i++) {
+		cl_kernel *kernel = &clState->x11_kernels[i];
+		unsigned int num = 0;
+		if (i == 0) { // blake
+			CL_SET_ARG(clState->CLbuffer0);
+		}
+		CL_SET_ARG(clState->padbuffer8);
+		if (i == 12) {
+			CL_SET_ARG(clState->outputBuffer);
+			CL_SET_ARG(le_target);
+		}
+	}
 
 	return status;
 }
+
+//KEPT AS REFERENCE
+//static cl_int queue_sph_kernel(_clState *clState, dev_blk_ctx *blk, __maybe_unused cl_uint threads)
+//{
+//	unsigned char *midstate = blk->work->midstate;
+//	cl_kernel *kernel = &clState->kernel;
+//	unsigned int num = 0;
+//	cl_ulong le_target;
+//	cl_int status = 0;
+//
+//	le_target = *(cl_ulong *)(blk->work->device_target + 24);
+//	flip80(clState->cldata, blk->work->data);
+//	status = clEnqueueWriteBuffer(clState->commandQueue, clState->CLbuffer0, true, 0, 80, clState->cldata, 0, NULL,NULL);
+//
+//	CL_SET_ARG(clState->CLbuffer0);
+//	CL_SET_ARG(clState->outputBuffer);
+//	CL_SET_ARG(le_target);
+//
+//	return status;
+//}
 
 
 static void set_threads_hashes(unsigned int vectors, unsigned int compute_shaders, int64_t *hashes, size_t *globalThreads,
@@ -1354,51 +1327,6 @@ static bool opencl_thread_prepare(struct thr_info *thr)
 	if (!cgpu->kname)
 	{
 		switch (clStates[i]->chosen_kernel) {
-			case KL_ALEXKARNEW:
-				cgpu->kname = ALEXKARNEW_KERNNAME;
-				break;
-			case KL_ALEXKAROLD:
-				cgpu->kname = ALEXKAROLD_KERNNAME;
-				break;
-			case KL_CKOLIVAS:
-				cgpu->kname = CKOLIVAS_KERNNAME;
-				break;
-			case KL_ZUIKKIS:
-				cgpu->kname = ZUIKKIS_KERNNAME;
-				break;
-			case KL_PSW:
-				cgpu->kname = PSW_KERNNAME;
-				break;
-			case KL_DARKCOIN:
-				cgpu->kname = DARKCOIN_KERNNAME;
-				break;
-			case KL_QUBITCOIN:
-				cgpu->kname = QUBITCOIN_KERNNAME;
-				break;
-			case KL_QUARKCOIN:
-				cgpu->kname = QUARKCOIN_KERNNAME;
-				break;
-			case KL_MYRIADCOIN_GROESTL:
-				cgpu->kname = MYRIADCOIN_GROESTL_KERNNAME;
-				break;
-			case KL_FUGUECOIN:
-				cgpu->kname = FUGUECOIN_KERNNAME;
-				break;
-			case KL_INKCOIN:
-				cgpu->kname = INKCOIN_KERNNAME;
-				break;
-			case KL_ANIMECOIN:
-				cgpu->kname = ANIMECOIN_KERNNAME;
-				break;
-			case KL_GROESTLCOIN:
-				cgpu->kname = GROESTLCOIN_KERNNAME;
-				break;
-			case KL_SIFCOIN:
-				cgpu->kname = SIFCOIN_KERNNAME;
-				break;
-			case KL_TWECOIN:
-				cgpu->kname = TWECOIN_KERNNAME;
-				break;
 			case KL_MARUCOIN:
 				cgpu->kname = MARUCOIN_KERNNAME;
 				break;
@@ -1430,25 +1358,8 @@ static bool opencl_thread_init(struct thr_info *thr)
 	}
 
 	switch (clState->chosen_kernel) {
-	case KL_ALEXKARNEW:
-	case KL_ALEXKAROLD:
-	case KL_CKOLIVAS:
-	case KL_PSW:
-	case KL_ZUIKKIS:
-		thrdata->queue_kernel_parameters = &queue_scrypt_kernel;
-		break;
-	case KL_DARKCOIN:
-	case KL_QUBITCOIN:
-	case KL_QUARKCOIN:
-	case KL_MYRIADCOIN_GROESTL:
-	case KL_FUGUECOIN:
-	case KL_INKCOIN:
-	case KL_ANIMECOIN:
-	case KL_GROESTLCOIN:
-	case KL_SIFCOIN:
-	case KL_TWECOIN:
 	case KL_MARUCOIN:
-		thrdata->queue_kernel_parameters = &queue_sph_kernel;
+		thrdata->queue_kernel_parameters = &queue_x13_kernel;
 		break;
 	default:
 		applog(LOG_ERR, "Failed to choose kernel in opencl_thread_init");
@@ -1495,6 +1406,7 @@ static int64_t opencl_scanhash(struct thr_info *thr, struct work *work,
 	_clState *clState = clStates[thr_id];
 	const cl_kernel *kernel = &clState->kernel;
 	const int dynamic_us = opt_dynamic_interval * 1000;
+	int i;
 
 	cl_int status;
 	size_t globalThreads[1];
@@ -1536,11 +1448,16 @@ static int64_t opencl_scanhash(struct thr_info *thr, struct work *work,
 		size_t global_work_offset[1];
 
 		global_work_offset[0] = work->blk.nonce;
-		status = clEnqueueNDRangeKernel(clState->commandQueue, *kernel, 1, global_work_offset,
-						globalThreads, localThreads, 0,  NULL, NULL);
-	} else
-		status = clEnqueueNDRangeKernel(clState->commandQueue, *kernel, 1, NULL,
-						globalThreads, localThreads, 0,  NULL, NULL);
+		for (i = 0; i < 13 && status == CL_SUCCESS; i++) {
+			status = clEnqueueNDRangeKernel(clState->commandQueue, clState->x11_kernels[i], 1, global_work_offset,
+					globalThreads, localThreads, 0,  NULL, NULL);
+		}
+	} else {
+		for (i = 0; i < 13 && status == CL_SUCCESS; i++) {
+			status = clEnqueueNDRangeKernel(clState->commandQueue, clState->x11_kernels[i], 1, NULL,
+				globalThreads, localThreads, 0,  NULL, NULL);
+		}
+	}
 	if (unlikely(status != CL_SUCCESS)) {
 		applog(LOG_ERR, "Error %d: Enqueueing kernel onto command queue. (clEnqueueNDRangeKernel)", status);
 		return -1;
