@@ -10126,7 +10126,7 @@ __attribute__((reqd_work_group_size(WORKSIZE, 1, 1)))
 __kernel void fugue(volatile __global hash_t* hashes, volatile __global uint* output, const ulong target)
 {
     uint gid = get_global_id(0);
-    __global hash_t *hash = &(hashes[gid-get_global_offset(0)]);
+    hash_t hash;
 
     // mixtab
     __local sph_u32 mixtab0[256], mixtab1[256], mixtab2[256], mixtab3[256];
@@ -10140,7 +10140,15 @@ __kernel void fugue(volatile __global hash_t* hashes, volatile __global uint* ou
     	mixtab3[i] = mixtab3_c[i];
     }
     barrier(CLK_LOCAL_MEM_FENCE);
-        // fugue
+
+
+    // copies hashes to "hash"
+    uint offset = get_global_offset(0);
+    for (int i = 0; i < 8; i++) {
+    	hash.h8[i] = hashes[gid-offset].h8[i];
+    }
+
+    // fugue
 	sph_u32 S00, S01, S02, S03, S04, S05, S06, S07, S08, S09;
 	sph_u32 S10, S11, S12, S13, S14, S15, S16, S17, S18, S19;
 	sph_u32 S20, S21, S22, S23, S24, S25, S26, S27, S28, S29;
@@ -10154,12 +10162,12 @@ __kernel void fugue(volatile __global hash_t* hashes, volatile __global uint* ou
         S28 = SPH_C32(0xaac6e2c9); S29 = SPH_C32(0xddb21398); S30 = SPH_C32(0xcae65838); S31 = SPH_C32(0x437f203f);
         S32 = SPH_C32(0x25ea78e7); S33 = SPH_C32(0x951fddd6); S34 = SPH_C32(0xda6ed11d); S35 = SPH_C32(0xe13e3567);
 
-        FUGUE512_3((hash->h4[0x0]), (hash->h4[0x1]), (hash->h4[0x2]));
-        FUGUE512_3((hash->h4[0x3]), (hash->h4[0x4]), (hash->h4[0x5]));
-        FUGUE512_3((hash->h4[0x6]), (hash->h4[0x7]), (hash->h4[0x8]));
-        FUGUE512_3((hash->h4[0x9]), (hash->h4[0xA]), (hash->h4[0xB]));
-        FUGUE512_3((hash->h4[0xC]), (hash->h4[0xD]), (hash->h4[0xE]));
-        FUGUE512_3((hash->h4[0xF]), as_uint2(fc_bit_count).y, as_uint2(fc_bit_count).x);
+        FUGUE512_3((hash.h4[0x0]), (hash.h4[0x1]), (hash.h4[0x2]));
+        FUGUE512_3((hash.h4[0x3]), (hash.h4[0x4]), (hash.h4[0x5]));
+        FUGUE512_3((hash.h4[0x6]), (hash.h4[0x7]), (hash.h4[0x8]));
+        FUGUE512_3((hash.h4[0x9]), (hash.h4[0xA]), (hash.h4[0xB]));
+        FUGUE512_3((hash.h4[0xC]), (hash.h4[0xD]), (hash.h4[0xE]));
+        FUGUE512_3((hash.h4[0xF]), as_uint2(fc_bit_count).y, as_uint2(fc_bit_count).x);
 
         // apply round shift if necessary
         int i;
@@ -10200,24 +10208,24 @@ __kernel void fugue(volatile __global hash_t* hashes, volatile __global uint* ou
         S18 ^= S00;
         S27 ^= S00;
 
-        hash->h4[0] = SWAP4(S01);
-        hash->h4[1] = SWAP4(S02);
-        hash->h4[2] = SWAP4(S03);
-        hash->h4[3] = SWAP4(S04);
-        hash->h4[4] = SWAP4(S09);
-        hash->h4[5] = SWAP4(S10);
-        hash->h4[6] = SWAP4(S11);
-        hash->h4[7] = SWAP4(S12);
-        hash->h4[8] = SWAP4(S18);
-        hash->h4[9] = SWAP4(S19);
-        hash->h4[10] = SWAP4(S20);
-        hash->h4[11] = SWAP4(S21);
-        hash->h4[12] = SWAP4(S27);
-        hash->h4[13] = SWAP4(S28);
-        hash->h4[14] = SWAP4(S29);
-        hash->h4[15] = SWAP4(S30);
+        hash.h4[0] = SWAP4(S01);
+        hash.h4[1] = SWAP4(S02);
+        hash.h4[2] = SWAP4(S03);
+        hash.h4[3] = SWAP4(S04);
+        hash.h4[4] = SWAP4(S09);
+        hash.h4[5] = SWAP4(S10);
+        hash.h4[6] = SWAP4(S11);
+        hash.h4[7] = SWAP4(S12);
+        hash.h4[8] = SWAP4(S18);
+        hash.h4[9] = SWAP4(S19);
+        hash.h4[10] = SWAP4(S20);
+        hash.h4[11] = SWAP4(S21);
+        hash.h4[12] = SWAP4(S27);
+        hash.h4[13] = SWAP4(S28);
+        hash.h4[14] = SWAP4(S29);
+        hash.h4[15] = SWAP4(S30);
 
-    bool result = (hash->h8[3] <= target);
+    bool result = (hash.h8[3] <= target);
     if (result)
         output[atomic_inc(output+0xFF)] = SWAP4(gid);
 
