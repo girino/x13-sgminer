@@ -267,7 +267,13 @@ static bool prepare_adl(void)
 	int result;
 
 #if defined (UNIX)
+#ifdef __CYGWIN__
+	hDLL = dlopen("atiadlxx.dll", RTLD_LAZY|RTLD_GLOBAL);
+	if (hDLL == NULL)
+		hDLL = dlopen("atiadlxy.dll", RTLD_LAZY|RTLD_GLOBAL);
+#else
 	hDLL = dlopen( "libatiadlxx.so", RTLD_LAZY|RTLD_GLOBAL);
+#endif
 #else
 	hDLL = LoadLibrary("atiadlxx.dll");
 	if (hDLL == NULL)

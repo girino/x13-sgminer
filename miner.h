@@ -376,21 +376,6 @@ enum dev_enable {
 
 enum cl_kernels {
 	KL_NONE,
-	KL_ALEXKARNEW,	// kernels starting from this will have difficulty calculated by using litecoin algorithm
-	KL_ALEXKAROLD,
-	KL_CKOLIVAS,
-	KL_PSW,
-	KL_ZUIKKIS,
-	KL_QUARKCOIN,	// kernels starting from this will have difficulty calculated by using quarkcoin algorithm
-	KL_QUBITCOIN,
-	KL_INKCOIN,
-	KL_ANIMECOIN,
-	KL_SIFCOIN,
-	KL_DARKCOIN,	// kernels starting from this will have difficulty calculated by using bitcoin algorithm
-	KL_MYRIADCOIN_GROESTL,
-	KL_FUGUECOIN,
-	KL_GROESTLCOIN,
-	KL_TWECOIN,
 	KL_MARUCOIN,
 };
 
