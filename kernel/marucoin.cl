@@ -291,14 +291,18 @@ __kernel void groestl(volatile __global hash_t* hashes)
     m[15] = 0x100000000000000; g[15] = m[15] ^ H[15];
     PERM_BIG_P(g);
     PERM_BIG_Q(m);
+#pragma unroll 16
     for (unsigned int u = 0; u < 16; u ++)
         H[u] ^= g[u] ^ m[u];
     sph_u64 xH[16];
+#pragma unroll 16
     for (unsigned int u = 0; u < 16; u ++)
         xH[u] = H[u];
     PERM_BIG_P(xH);
+#pragma unroll 16
     for (unsigned int u = 0; u < 16; u ++)
         H[u] ^= xH[u];
+#pragma unroll 8
     for (unsigned int u = 0; u < 8; u ++)
         hash->h8[u] = DEC64E(H[u + 8]);
 	barrier(CLK_GLOBAL_MEM_FENCE);
