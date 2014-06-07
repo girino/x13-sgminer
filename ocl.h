@@ -41,6 +41,7 @@ typedef struct {
 	enum cl_kernels chosen_kernel;
 } _clState;
 
+extern const char* x11_kernel_names[];
 extern char *file_contents(const char *filename, size_t *length);
 extern int clDevicesNum(void);
 extern _clState *initCl(unsigned int gpu, char *name, size_t nameSize);

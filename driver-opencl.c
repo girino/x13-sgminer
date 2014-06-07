@@ -1446,12 +1446,27 @@ static int64_t opencl_scanhash(struct thr_info *thr, struct work *work,
 
 	if (clState->goffset) {
 		size_t global_work_offset[1];
+		cgtimer_t t[14];
 
 		global_work_offset[0] = work->blk.nonce;
 		for (i = 0; i < 13 && status == CL_SUCCESS; i++) {
+			if (opt_debug) cgtimer_time(&t[i]);
 			status = clEnqueueNDRangeKernel(clState->commandQueue, clState->x11_kernels[i], 1, global_work_offset,
 					globalThreads, localThreads, 0,  NULL, NULL);
+			if (opt_debug) clFinish(clState->commandQueue);
 		}
+		if (opt_debug) {
+			cgtimer_time(&t[13]);
+			cgtimer_t res;
+			cgtimer_sub(&t[13], &t[0], &res);
+
+			applog(LOG_INFO, "Total time: %d", cgtimer_to_ms(&res));
+			for (i = 0; i < 13; i++) {
+				cgtimer_sub(&t[i+1], &t[i], &res);
+				applog(LOG_INFO, "Time for %s: %d", x11_kernel_names[i], cgtimer_to_ms(&res));
+			}
+		}
+
 	} else {
 		for (i = 0; i < 13 && status == CL_SUCCESS; i++) {
 			status = clEnqueueNDRangeKernel(clState->commandQueue, clState->x11_kernels[i], 1, NULL,
