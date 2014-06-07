@@ -40,6 +40,8 @@
 #ifndef MARUCOIN_CL
 #define MARUCOIN_CL
 
+#pragma OPENCL EXTENSION cl_khr_byte_addressable_store : enable
+
 #if __ENDIAN_LITTLE__
 #define SPH_LITTLE_ENDIAN 1
 #else
